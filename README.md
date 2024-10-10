@@ -3,18 +3,34 @@
 
 ## 0. Introduction
 ***
-> This project presents an **analysis of the rental market in Valencia** to acknowledge what are the most important characteristics of the houses offered to take advantage on the strategies used to rent a house or invest in real estate. It might also help people on the looking for a new house in Valencia to better understand the idiosyncrasy of one of the most trendy cities in Spain.
+> This project presents an **analysis of the rental market in Valencia** to identify the key characteristics of the houses offered. This can help optimize strategies for renting or investing in real estate. It may also assist individuals searching for a new home in Valencia to better understand the market dynamics in one of Spain's trendiest cities.
 >
-> But that is not the only thing, a **model trained to estimate the renting price** was trained and it will give you a first estimation based on the overall environment of the real estate in Valencia. At the same time, if you want to invest in a new property to rent afterwards you can take profit of this model by comparing the price of the buy with the rental price estimation.
+>Additionally, **a model was trained to estimate rental prices**, providing a preliminary estimation based on the real estate environment in Valencia. If you're considering investing in a property to rent out, you can also use this model to compare potential purchase prices with estimated rental income.
 >
->
->> Before getting into detail, you have to understand that the data concerning this topic is very valuable and that is why the most important renting websites keep it very secured. Therefore, **the data used in this project is not as complete as we would like.** For example, not every district of Valencia has enough information to be reliable. That is why the model trained only takes into account the districts marked in green in the next map. The other zones will be aggregated in the same category and, therefore, they would not be as precise as expected. 
->> ![alt text](./Images/map_data_available.png)
+>![prediction example](./Images/prediction_example.gif)
 
-> ![alt text](./Images/price_distribution.png) 
+> Before diving into the details, it’s important to note that data on this subject is highly valuable, which is why major rental websites protect it carefully. As a result, **the data used in this project is not as complete as we would like.** For instance, not every district in Valencia has sufficient information to be reliable. The model trained only includes the districts marked in green on the following map, while other areas are aggregated, making them less precise.
+>
+> ![Data available map](./Images/map_data_available.png)
 
-> ### Economic insights 
-> ***
+> ### Price distribution
+>
+>![Price boxplot](./Images/price_distribution.png) 
+
+### Technical key points 
+***
+- Webscrapping highly secured data
+- Filling missing values using ratios
+- Modelling optimization: dropping extreme values and enriching dataset with new feature (new webscrapping)
+- Next steps: propose future lines of work
+
+### Economic insights 
+***
+- Districts in the city center are more expensive
+- Some districts near the center may represent market opportunities due to their relatively lower prices
+- Smaller houses have a higher price per square meter, most of them are located in the city center
+- Houses with just one room are very small and, therefore, have a higher price per square meter
+
 
 ## 1. Data 
 ***
@@ -22,30 +38,31 @@
 
 ### 1.1.  Webscrapping
 
-> As commented before, the data concerning this topic is very difficult to retrieve. The most important renting companies invest a lot of money in preventing others to obtain this information from their website. After trying to avoid the security levels of the top companies with no succes, we were able to webscrap a second tier website with less quantity of observations.
+> As mentioned earlier, data on this topic is difficult to obtain. Major rental companies invest heavily in preventing others from scraping their websites. After failing to bypass the top companies' security measures, we managed to scrape data from a second-tier website with fewer observations.
 >
-> The tools used to obtain this data where: 
->> **Selenium: to open and scroll the pages to avoid lazy loading and take the html file**
+> The tools used for data retrieval were: 
+>> **Selenium: to open and scroll through pages, avoiding lazy loading and retrieving the HTML file.**
 >>
->> **Beatiful Soup: to retrieve the information required**
+>> **Beatiful Soup: to extract the necessary information.**
 >
-> #### The webscraping codes and the datasets obtained are hidden for legal reasons
+> #### The web scraping code and datasets are not shared for legal reasons.
  
 
 ### 1.2. Data restructuring
 
-> This part is just to present the _**Data_restructuring.ipynb**_ file. This file is specifically designed to help the interested parts the information retrieved from the website without sharing the webscraping codes and the datasets obtained. 
+> This section introduces the _**Data_restructuring.ipynb**_ file, which is designed to help stakeholders better understand the information retrieved from the website without sharing the scraping code or datasets.
+
 
 ### 1.3 Nan values filling
 
-> Commonly, when working with data not always every feature has all its values completed and this is no exception. Different strategies where used in this case to fill the missing values and they are presented in the **_Data_exploration.ipynb_** file. But, some of them are interesting enough to comment them. 
+> It's common when working with data to encounter incomplete features, and this case is no exception. Various strategies were used to fill the missing values, which are detailed in the _**Data_exploration.ipynb**_ file. Some of the more interesting methods are worth highlighting. 
 >
-> At first sight, features like number of rooms and surface seem very important. That is why a simple imputer in this case does not work very well. More creative ways are needed that is why some ratios were calculated to estimate these missing values.
->> We focus on the filling of the surface as an example to better understand this concept. Using the observations where the data was complete, a **ratio between the surface and the different spaces** of the house was calculated. **These different spaces were weighted** to simulate the proportions of each one of them compared to a room. The following ecuation defines this constant.
+> At first glance, features like the number of rooms and surface area are very important, so a simple imputer may not work well. More creative approaches were needed, such as calculating ratios to estimate missing values.
+>> For instance, to fill in missing surface area values, we used observations where data was complete to calculate a **ratio between the surface area and different parts of the house. These spaces were weighted** based on their size relative to a room. The equation below defines this constant:
 >>
 >> $$Ratio = \frac{1}{n} \times \sum_{k=1}^n  \frac{Surface_k [m^2]}{1 \times Rooms_k + 0,5 \times Bathrooms_k + 0,75 \times Terrace_k + 0,25 \times Balcony_k} $$ 
 >>
->> After obtaining this ratio, for the offers that had the number of spaces complete but no surface, we were able to estimate it by multiplying their weighted values by this ratio.
+>> After calculating this ratio, for listings where the number of rooms was known but the surface area was missing, we estimated it by multiplying their weighted values by the ratio.
 >>
 >> $$Surface Estimation_k = Ratio \times (Rooms_k + 0,5 \times Bathrooms_k + 0,75 \times Terrace_k + 0,25 \times Balcony_k)$$
 
@@ -64,104 +81,104 @@
 >    - **Rooms:** Nº of rooms. 
 >    - **Bathrooms:** Nº of bathrooms. 
 >    - **Surface:** Square meters of the house. 
->    - ***Agent_cat:** Type of real estate agent managing the offer (Variable added during model optimization). It can also be interpreted as Premium/No premium House.*
->    - **Price:** Target variable
+>    - **Agent_cat:** Type of real estate agent managing the offer (added during model optimization, can also indicate Premium/Non-premium house).
+>    - **Price:** Target variable (rent).
 
 ## 2. Analysis
 ***
->
-> A complete analysis of the different characteristics is elaborated in the **_Data_exploration.ipynb_** file while in this section the most relevant insights are presented.
+>A complete analysis of the dataset's characteristics is available in the _**Data_exploration.ipynb**_ file. Here, we present the most relevant insights.
 
 ### 2.1. Price per square meter by Location
 
-> One of the most common metrics to better understand the real estate is the price per square meter. This variable was calculated and we present downstream the highest and lowest values by district in the next graph. This might seem very simplistic but it is very important to acknowledge the idiosyncrasy of the city. 
-> ![alt text](./Images/highest_lowest_prices.png) <br><br><br>
+> One of the most common metrics for understanding the real estate market is the price per square meter. This variable was calculated, and the graph below shows the districts with the highest and lowest prices. Though simple, this metric is crucial for grasping the city's real estate dynamics.
+> ![Top 5 and bottom 5 prices per square meter](./Images/highest_lowest_prices.png) <br><br><br>
 > 
-> It is even more significant to have a map of the city where you can find the price per square meter of each location. As we can see in this map there is a clear pattern, **the districts situated in the center of the city are more expensive** than the rest and the further you get the lower the price per square meter. Also, we can point that there are **some districts near to the center that might be market opportunities** due to its low price.
-> ![alt text](./Images/map_price.png)
+> The map below illustrates the price per square meter for each district, showing a clear pattern: **districts in the city center are more expensive** than those farther away. Additionally, **some districts near the center may represent market opportunities** due to their relatively lower prices.
+> ![Price map](./Images/map_price.png)
 
 
 
 ### 2.2. Price per square meter by nº of rooms
 
-> Normally, you would think that the higher the number of rooms the more expensive the house but if we take into account the price per square meter this is not the case. As we can see in the graph below where the distributions of this variable by number of rooms are presented as boxplots, the lower the number of rooms the more expensive the square meter is. Trying to understand this behaviour two hypothesis were raised to perform a deeper analysis.
->> **<ins>Hypothesis 1:</ins> Houses with just one room are very small** that is why they have a higher €/m²** because there is also a minimum threshold for the price. <br>
->> **<ins>Hypothesis 2:</ins> Houses with more surface have more rooms but these ones are located in lower €/m² zones.** 
+> Typically, one might expect that the more rooms a house has, the more expensive it is. However, if we examine the price per square meter, the opposite is true. As shown in the boxplots below, houses with fewer rooms tend to have a higher price per square meter. Two hypotheses were formulated to explore this behavior:
+>> **<ins>Hypothesis 1:</ins> One-room houses are small, so they have a higher €/m² due to a minimum price threshold.** <br>
+>> **<ins>Hypothesis 2:</ins> Houses with more rooms are located in lower €/m² zones.** 
 >
-> ![alt text](./Images/price_distribution_rooms.png)
+> ![Price per square meter boxplots by rooms](./Images/price_distribution_rooms.png)
 
 #### 2.2.1. Size by rooms
 
-> To check the first hypothesis, the average surface for each number of rooms and the difference between consecutive categories are ploted. As we can see, **the average surface for houses with just one room is 50 m$^2$** and the maximum increase is between houses with 1 and 2 rooms with 33 m$^2$. This is an **increase in surface of 66%** and, for instance, the second highest increase is just of 28% (from 2 to 3 rooms). In relative terms we can then assume that houses with just one room are very small.
+> To check the first hypothesis, the average surface area for each room count was plotted. **Houses with just one room average 50 m², and the largest increase in surface area (66%) occurs between one- and two-room houses.** We can conclude that one-room houses are significantly smaller.
 >
-> ![alt text](./Images/average_surface_rooms.png)
+> ![Average surface by rooms](./Images/average_surface_rooms.png)
 
 #### 2.2.2. Nº of rooms by location
 
->To check the second hypothesis, the locations have been categorized by range of price per square meter using the following categories: ['<16 €/m²', '16-19 €/m²', '19-22 €/m²', '>22 €/m²']. Then, the average number of rooms for these categories have been calculated showing that **the higher the price per square meter the less number of rooms**. Parallelly, the same aggregation has been done to plot the map per districts to check the location of this categories. **The highest prices per square meter (where the number of rooms is lower) are located in the center of the city** where it seems logical that the houses are smaller.
-
+> To verify the second hypothesis, locations were categorized by price per square meter in four ranges: ['<16 €/m²', '16-19 €/m²', '19-22 €/m²', '>22 €/m²']. **The higher the price per square meter, the fewer rooms houses** in that area tend to have. A map further illustrates that **the highest prices per square meter are found in the city center, where smaller houses are more common.** 
 
 '                          | '                         
 :-------------------------:|:--------------------------: 
-![alt text](./Images/map_price_range.png) | <img src="./Images/average_n_rooms.png" width="500" height="500" />
+![Price map by range](./Images/map_price_range.png) | <img src="./Images/average_n_rooms.png" width="500" height="300" />
 
 
 
 ## 3. Modelling
 ***
 
-> In this part, the process to train a model to estimate the price of a house according to its characteristics is explained. **The objective** marked at the beginning of the modelling **is to reach a lower RMSE than 300** which seems reasonable due to the low quantity of data. For a more detailed description check the ***Modelling.ipynb*** file.
+>In this section, the process of training a model to estimate house prices based on their features is explained. **The goal was to achieve an RMSE below 300**, which is reasonable given the small dataset. For more details, see the _**Modelling.ipynb**_ file.
+
 ### 3.1. First results 
 
->To start with the modelling and after doing all the preprocessing required several differente regression model were trained to check which ones were the most promising performance wise. Many metrics were calculated but the one chosen to compare the results was the Root Mean Square Error because it has the same dimension as the target (Price). 
+> After preprocessing the data, several regression models were trained. While various metrics were calculated, the chosen metric for comparison was Root Mean Square Error (RMSE), as it has the same dimension as the target (price).
+>
 >
 >> **Results** (Most notable models): <br><br> - LinearRegression: _Decent performance in test (RMSE=499) despite its simplicity_ <br><br> - RandomForestRegresor: _Noteworthy performance in test (RMSE=460 // Best) and massive difference with training (RMSE=235) due to overfitting what might make it optimizable using specific hyperparameters_ <br><br> - GradientBoostingRegressor: _Best perfomance in test **(RMSE=460)**_
 >
-> ![alt text](./Images/First_models_results.png)
+> ![First models results](./Images/First_models_results.png)
 
 
 ### 3.2. Optimization
 
-> After obtaining the first results, an optimization process was carried out to reach the objective (RMSE<300). 
+> After the initial results, an optimization process was undertaken to achieve the target RMSE (<300).
+
 #### 3.2.1. Dropping extreme values
 
->> To understand the behaviour of the models, the difference between the preditions of the Random Forest model and the real values of the test set was calculated and then ploted in an histogram. As we can see, the highest differences were for highly underestimated observations.
->> ![alt text](./Images/histogram_extreme_values.png)
+>> To understand model performance, the differences between the Random Forest model predictions and actual values were analyzed. The highest differences were for highly underestimated listings.
+>>
+>> ![Histogram extreme values](./Images/histogram_extreme_values.png)
 >
->> At the same time, a scatter plot was done to compare the predictions and the real values. In the graph below, we can see also three lines that mark the perfect estimation and the range of +/- 300 (RMSE objective). It is noticeable that the **extreme values (over 2925 euros) are always very underestimated** and represent a major part of those underestimations pointed in the histogram.
+>> A scatter plot comparing predictions with real values shows that **extreme values (over €2925) are consistently underestimated** and represent most of the largest errors. In the graph below, we can see also three lines that mark the perfect estimation and the range of +/- 300 (RMSE objective).
 >>
 >>
->> ![alt text](./Images/predvsreal_extreme_values.png)
->> **The approach was to drop many of these extreme values** to reduce the artificial error and to avoid overestimations in other observations. Not every extreme value was dropped to avoid, on one hand, dropping too many offers, and on another one, underestimations in offers around the threshold.
+>> ![Pred vs Real](./Images/predvsreal_extreme_values.png)
+>> **The approach was to drop many of these extreme values** to reduce the artificial error and avoid overestimations in other observations.  Not all extreme values were removed to prevent, on one hand, excessive data loss, and on another one, underestimations in offers around the threshold.
 >>
->> This optimization step had as result a **reduction in the RMSE from 460 to 358 in the Gradient Boosting model.**
+>> This optimization step resulted in a **reduction in the RMSE from 460 to 358 in the Gradient Boosting model.**
 >> 
 
 
 #### 3.2.2. Enriching the dataset with new feature
 
-> When analysing the most underestimated offers in the website where the data was scrapped, an idea for a new feature came up. Many of these offers had the same real state agent: Engel & Volkers and, at the same time, the houses seemed very comfortable and aesthetic. This info was not retrieved in the first webscraping so a **new webscrapping was performed to get the agent name of the offer.**
+> While analyzing the most underestimated offers in the website scraped, we identified a potential new feature.  Many of these offers were listed by the same real estate agent: Engel & Völkers. These properties also appeared to be more aesthetically appealing and comfortable. This information was not collected during the initial web scraping, so a **new web scraping process** was conducted to retrieve the agent names associated with each offer.
 >
-> To check how the agent affected to the value of the offer, an histogram was plotted to check the distribution of agent in the price per square meter variable. As we can see, a gap defining two groups was found (around 23 €/m²) which helped to define a **new binary feature 'Agent_cat' that can be interpreted also as Premium/No premium house.**
+> To assess the impact of the agent on rental prices, we plotted a histogram showing the distribution of price per square meter for different agents. The results revealed a clear distinction, with a gap around 23 €/m², which led to the creation of a **new binary feature, 'Agent_cat', which can be interpreted as distinguishing between premium and non-premium properties.**
 >
-> ![alt text](./Images/histogram_agents.png)
+> ![Histogram agents](./Images/histogram_agents.png)
 >
->When training the models an improvement in performance was achieved reaching, for example, **a test RMSE in Gradient Boosting of 305.**
+> By incorporating this new feature into the model, we achieved an improvement in performance. For example, the **Gradient Boosting model reached a test RMSE of 305.**
 
 #### 3.2.3. Searching best hyperparameters
 
-> After point 3.2.2, the Random Forest had a RMSE in training of 148 and in test of 317. It was appealing to try to select the best hyperparameters to reduce overfitting and improve the performance. **The result was not good enough (RMSE=306) to select this model over the Gradient Boost one.**
-> ![alt text](./Images/Final_models_results.png) <br> <br>
-> **The model that will be used is the Gradient Boost regressor with a RMSE in test of 305.**
+> Following the introduction of the 'Agent_cat' feature, the Random Forest model had an RMSE of 148 on the training set and 317 on the test set. This significant gap suggested overfitting, prompting an attempt to optimize the hyperparameters in order to improve the model's performance. However, the resulting test RMSE of 306 was not a substantial improvement, making it insufficient to outperform the Gradient Boosting model.
+> ![Final models results](./Images/Final_models_results.png) <br> <br>
+> **Therefore, the final model selected for use is the Gradient Boosting regressor, which achieved a test RMSE of 305.**
 
 
 
 ## 4. Next steps
 >
-> **Some tasks have remained undone** due to their high cost but it is necessary to mark them to understand that this project is just a start point and can have other beneficial endings. Some of these tasks are:
+> **Several tasks remain uncompleted** due to resource limitations, but it is important to outline them as they can significantly enhance the project in the future. The main tasks include: 
 ><br>
->> **- Obtain more data** and enrich this data with more features. <br>
->> **- Perform a similar analysis of the buying market to compare the results and underline the market opportunities.**<br>
->> **- Periodically retrieve the data and analyse it to obtain the dynamic behaviour of the market** 
-
-![prediction example](./Images/prediction_example.gif)
+>> **- Acquiring more data to expand the dataset and introduce additional features.**<br>
+>> **- Conducting a similar analysis on the property buying market to compare results and identify investment opportunities.**<br>
+>> **- Periodically updating the dataset to monitor and analyze trends and gain insights into the dynamic behavior of the rental market.** 
